@@ -73,32 +73,40 @@ function neuBerechnen() {
 function wagenAuswaehlen() {
   const select = document.getElementById("wagenSelect");
   const gewaehlteId = select.value;
+  const btnLoeschen = document.getElementById("btn_loeschen"); // Den Button suchen
   
-  if (!gewaehlteId) return; // "Manuelle Eingabe"
-
-  // Hole die lokalen Profile
-  const profile = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
-  
-  // Logik-Weiche: Suche den Wagen zuerst in den Presets...
-  let wagen = PRESETS.find(p => p.id === gewaehlteId);
-  
-  // ... wenn er da nicht ist, suche in den lokal gespeicherten Wägen
-  if (!wagen) {
-    wagen = profile.find(p => p.id == gewaehlteId);
+  // Wenn "Manuelle Eingabe" gewählt ist
+  if (!gewaehlteId) {
+    btnLoeschen.style.display = "none"; 
+    return;
   }
 
-  // Wenn der Wagen gefunden wurde (egal aus welcher Liste), Felder ausfüllen
+  const profile = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+  
+  // Prüfen, ob es ein Preset ist
+  let wagen = PRESETS.find(p => p.id === gewaehlteId);
+  
+  if (wagen) {
+    // Es ist ein Preset -> Löschen verbieten (Button verstecken)
+    btnLoeschen.style.display = "none";
+  } else {
+    // Es ist kein Preset, also in eigenen Profilen suchen
+    wagen = profile.find(p => p.id == gewaehlteId);
+    if (wagen) {
+      // Eigener Wagen -> Löschen erlauben (Button anzeigen)
+      btnLoeschen.style.display = "block";
+    }
+  }
+
+  // Felder ausfüllen
   if (wagen) {
     document.getElementById("inp_B").value = wagen.B;
     document.getElementById("inp_HD").value = wagen.HD;
     document.getElementById("inp_HR").value = wagen.HR;
     document.getElementById("inp_Lo").value = wagen.Lo;
     document.getElementById("inp_Lu").value = wagen.Lu;
-    
-    // Fallback auf 0, falls ein alter gespeicherter Wagen noch keine Schnecke hatte
     document.getElementById("inp_DS").value = wagen.DS || 0; 
     
-    // Neu berechnen und das Maße-Akkordeon automatisch zuklappen
     neuBerechnen();
     document.getElementById("masseDetails").removeAttribute("open");
   }
@@ -170,4 +178,30 @@ function dropdownAktualisieren() {
     });
     select.appendChild(groupEigene);
   }
+}
+
+// NEU: Ausgewähltes Profil löschen
+function profilLoeschen() {
+  const select = document.getElementById("wagenSelect");
+  const gewaehlteId = select.value;
+
+  if (!gewaehlteId) return;
+
+  // Sicherheitsabfrage im Browser
+  const bestaetigt = confirm("Möchtest du diesen Wagen wirklich unwiderruflich löschen?");
+  if (!bestaetigt) return; // Wenn Nutzer auf Abbrechen klickt, stoppen
+
+  // 1. Hole alle gespeicherten Profile
+  let profile = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+  
+  // 2. Filtere den Wagen heraus (Behalte alle, deren ID NICHT die gewählte ist)
+  profile = profile.filter(wagen => wagen.id != gewaehlteId);
+  
+  // 3. Speichere die bereinigte Liste zurück
+  localStorage.setItem(DB_KEY, JSON.stringify(profile));
+
+  // 4. Aufräumen: Dropdown updaten, Auswahl zurücksetzen, Button verstecken
+  dropdownAktualisieren();
+  select.value = ""; 
+  document.getElementById("btn_loeschen").style.display = "none";
 }

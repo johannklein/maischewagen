@@ -9,10 +9,14 @@
 <body>
   <h2>1. Wagen auswählen (Optional)</h2>
   <!-- Wenn hier etwas gewählt wird, überschreibt es die Felder unten -->
+<!-- Das Dropdown-Menü -->
   <select id="wagenSelect" onchange="wagenAuswaehlen()">
     <option value="">-- Manuelle Eingabe --</option>
   </select>
 
+  <!-- Der Löschen-Button kommt DIREKT UNTER das abschließende </select> -->
+  <button id="btn_loeschen" class="btn-delete" onclick="profilLoeschen()" style="display: none;">Ausgewählten Wagen löschen</button>
+  
 <!-- HIER IST NEU: Der einklappbare Bereich -->
   <details id="masseDetails">
     <summary>📐 Wagen-Maße anzeigen / anpassen</summary>
