@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maischewagen Rechner</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>1. Wagen auswählen (Optional)</h2>
+  <!-- Wenn hier etwas gewählt wird, überschreibt es die Felder unten -->
+  <select id="wagenSelect" onchange="wagenAuswaehlen()">
+    <option value="">-- Manuelle Eingabe --</option>
+  </select>
+
+  <h2>2. Maße & Messung</h2>
+  <div>
+    <label>Breite B (m):</label>
+    <input type="number" id="inp_B" value="2.2" step="0.1" oninput="neuBerechnen()">
+  </div>
+  <div>
+    <label>Höhe Dreieck H_D (m):</label>
+    <input type="number" id="inp_HD" value="1.0" step="0.1" oninput="neuBerechnen()">
+  </div>
+  <div>
+    <label>Höhe Rechteck H_R (m):</label>
+    <input type="number" id="inp_HR" value="0.7" step="0.1" oninput="neuBerechnen()">
+  </div>
+  <div>
+    <label>Länge oben L_o (m):</label>
+    <input type="number" id="inp_Lo" value="5.0" step="0.1" oninput="neuBerechnen()">
+  </div>
+  <div>
+    <label>Länge unten L_u (m):</label>
+    <input type="number" id="inp_Lu" value="5.0" step="0.1" oninput="neuBerechnen()">
+  </div>
+  
+  <hr>
+  <div>
+    <label><strong>Abstand Oberkante d (cm):</strong></label>
+    <input type="number" id="inp_d" value="41" oninput="neuBerechnen()" style="background-color: #e6f2ff; font-weight: bold;">
+  </div>
+
+  <h2>3. Ergebnis</h2>
+  <p>Füllhöhe ab Spitze: <span id="out_h">0</span> m</p>
+  <p>Volumen: <strong id="out_liter" style="font-size: 1.2em; color: green;">0</strong> Liter</p>
+  <p>Gewicht (bei 1000 kg/m³): <strong id="out_gewicht">0</strong> kg</p>
+
+  <hr>
+  <h2>4. Aktuelle Maße speichern</h2>
+  <p style="font-size: 0.9em; color: gray;">Speichert die oben stehenden Maße für die Zukunft ab.</p>
+  <input type="text" id="w_name" placeholder="Name (z.B. Fendt Groß)">
+  <button onclick="profilAnlegen()">Als Profil speichern</button>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+/* --- GRUND-EINSTELLUNGEN --- */
+:root {
+  --primary-color: #007AFF; /* Modernes App-Blau */
+  --success-color: #28a745; /* Grün für Ergebnisse und Buttons */
+  --bg-color: #f4f4f9;      /* Heller, grauer App-Hintergrund */
+  --card-bg: #ffffff;
+  --text-main: #333333;
+  --text-muted: #666666;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  margin: 0;
+  padding: 15px;
+  
+  /* Zentriert die App auf dem PC, nutzt volle Breite auf dem Handy */
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* --- ÜBERSCHRIFTEN (Wie Sektions-Titel in Apps) --- */
+h2 {
+  font-size: 1.1rem;
+  color: var(--primary-color);
+  margin-top: 30px;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 2px solid #e0e0e0;
+  text-transform: none;
+  letter-spacing: 0.5px;
+}
+
+/* --- EINGABEFELDER & DROPDOWNS --- */
+div {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column; /* Label über dem Eingabefeld */
+}
+
+label {
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+input[type="number"],
+input[type="text"],
+select {
+  width: 100%;
+  padding: 14px 12px;
+  font-size: 1rem;
+  border: 1px solid #cccccc;
+  border-radius: 8px; /* Abgerundete Ecken */
+  background-color: var(--card-bg);
+  box-sizing: border-box; /* Verhindert, dass Felder über den Rand ragen */
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); /* Leichter 3D-Effekt */
+  transition: border-color 0.2s;
+}
+
+/* Wenn ein Feld angetippt wird */
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+}
+
+/* Spezielles Design für die tägliche Messung (wichtiger als der Rest) */
+#inp_d {
+  font-size: 1.2rem;
+  text-align: center;
+  border: 2px solid var(--primary-color);
+  background-color: #e6f2ff !important;
+}
+
+/* --- ERGEBNIS-BEREICH --- */
+p {
+  font-size: 1.1rem;
+  background-color: var(--card-bg);
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Karte wirft leichten Schatten */
+  display: flex;
+  justify-content: space-between; /* Text links, Zahl rechts */
+  align-items: center;
+}
+
+#out_liter {
+  font-size: 1.4rem;
+}
+
+/* --- BUTTONS --- */
+button {
+  width: 100%;
+  padding: 16px;
+  background-color: var(--success-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2);
+}
+
+button:active {
+  background-color: #218838; /* Etwas dunkler beim Drauftippen */
+  transform: translateY(2px); /* Button drückt sich nach unten */
+}
+
+/* --- TRENNLINIEN --- */
+hr {
+  border: none;
+  border-top: 1px dashed #cccccc;
+  margin: 25px 0;
+}
