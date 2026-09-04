@@ -236,17 +236,17 @@ function authUiAktualisieren() {
     document.getElementById('loggedInView').style.display = 'block';
     document.getElementById('userEmail').innerText = currentUser.email;
     
-    // Header-Button anpassen
-    btnHeader.innerText = "⚙️ " + currentUser.email.split('@')[0]; // Zeigt z.B. "⚙️ test"
-    btnHeader.style.backgroundColor = "#27ae60"; // Grüner Button, wenn eingeloggt
+    // Header-Button anpassen (Grün via CSS Variable)
+    btnHeader.innerText = "⚙️ " + currentUser.email.split('@')[0];
+    btnHeader.style.backgroundColor = "var(--success-color)";
   } else {
     document.getElementById('loggedOutView').style.display = 'block';
     document.getElementById('loggedInView').style.display = 'none';
     document.getElementById('userEmail').innerText = '';
     
-    // Header-Button anpassen
+    // Header-Button anpassen (Orange via CSS Variable)
     btnHeader.innerText = "👤 Login";
-    btnHeader.style.backgroundColor = "#f39c12"; // Oranger Button für Gäste
+    btnHeader.style.backgroundColor = "var(--primary-color)";
   }
 }
 

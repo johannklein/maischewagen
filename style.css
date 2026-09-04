@@ -1,12 +1,34 @@
-/* --- GRUND-EINSTELLUNGEN --- */
+/* --- GRUND-EINSTELLUNGEN & FARBPALETTE --- */
 :root {
-  --primary-color: #007AFF; /* Modernes App-Blau */
-  --success-color: #28a745;
-  --accent-color: #4ea1c4; /* gedämpftes Blau */
-  --bg-color: #f4f4f9;      /* Heller, grauer App-Hintergrund */
-  --card-bg: #ffffff;
-  --text-main: #333333;
-  --text-muted: #666666;
+  /* Haupt-Markenfarben */
+  --primary-color: #007AFF;       /* Modernes App-Blau */
+  --primary-light: #e6f2ff;       /* Sehr helles Blau für Hervorhebungen */
+  --primary-focus: rgba(0, 122, 255, 0.2); /* Transparenter Ring beim Tippen */
+  
+  /* Status-Farben (Aktionen) */
+  --success-color: #28a745;       /* Grün für Speichern/Erfolg */
+  --success-hover: #218838;       /* Dunkleres Grün beim Tippen */
+  --danger-color: #dc3545;        /* Rot für Löschen/Abmelden */
+  --danger-hover: #c82333;        /* Dunkleres Rot beim Tippen */
+  --warning-color: #f39c12;       /* Orange für den Gast-Login-Button */
+  --secondary-color: #6c757d;     /* Grau für Zweit-Aktionen */
+  
+  /* Hintergründe & Struktur */
+  --bg-color: #f4f4f9;            /* Heller, grauer App-Hintergrund außerhalb der Karten */
+  --bg-secondary: #f8f9fa;        /* Leicht abgesetzter Hintergrund (z.B. Akkordeon-Kopf) */
+  --card-bg: #ffffff;             /* Reines Weiß für die Inhaltsboxen */
+  --overlay-bg: rgba(0, 0, 0, 0.6); /* Abgedunkelter Hintergrund beim Popup */
+  
+  /* Texte */
+  --text-main: #333333;           /* Standard-Text */
+  --text-muted: #666666;          /* Unwichtigere Texte (Labels, Hinweise) */
+  --text-light: #ffffff;          /* Weiß für Text auf bunten Buttons */
+  
+  /* Rahmen & Schatten */
+  --border-light: #e0e0e0;        /* Sehr sanfte Rahmen */
+  --border-dark: #cccccc;         /* Deutlichere Rahmen (Eingabefelder) */
+  --shadow-light: rgba(0, 0, 0, 0.05); /* Sehr sanfter Schatten für Karten */
+  --shadow-medium: rgba(0, 0, 0, 0.3); /* Starker Schatten für das Popup */
 }
 
 body {
@@ -15,21 +37,19 @@ body {
   color: var(--text-main);
   margin: 0;
   padding: 15px;
-  
-  /* Zentriert die App auf dem PC, nutzt volle Breite auf dem Handy */
   max-width: 500px;
   margin-left: auto;
   margin-right: auto;
 }
 
-/* --- ÜBERSCHRIFTEN (Wie Sektions-Titel in Apps) --- */
+/* --- ÜBERSCHRIFTEN --- */
 h2 {
   font-size: 1.1rem;
   color: var(--primary-color);
   margin-top: 30px;
   margin-bottom: 10px;
   padding-bottom: 5px;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid var(--border-light);
   text-transform: none;
   letter-spacing: 0.5px;
 }
@@ -38,7 +58,7 @@ h2 {
 div {
   margin-bottom: 15px;
   display: flex;
-  flex-direction: column; /* Label über dem Eingabefeld */
+  flex-direction: column;
 }
 
 label {
@@ -50,31 +70,33 @@ label {
 
 input[type="number"],
 input[type="text"],
+input[type="email"],
+input[type="password"],
 select {
   width: 100%;
   padding: 14px 12px;
   font-size: 1rem;
-  border: 1px solid #cccccc;
-  border-radius: 8px; /* Abgerundete Ecken */
+  border: 1px solid var(--border-dark);
+  border-radius: 8px;
   background-color: var(--card-bg);
-  box-sizing: border-box; /* Verhindert, dass Felder über den Rand ragen */
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); /* Leichter 3D-Effekt */
+  color: var(--text-main);
+  box-sizing: border-box;
+  box-shadow: inset 0 1px 3px var(--shadow-light);
   transition: border-color 0.2s;
 }
 
-/* Wenn ein Feld angetippt wird */
 input:focus, select:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+  box-shadow: 0 0 0 3px var(--primary-focus);
 }
 
-/* Spezielles Design für die tägliche Messung (wichtiger als der Rest) */
+/* Tägliche Messung (Hervorgehoben) */
 #inp_d {
   font-size: 1.2rem;
   text-align: center;
   border: 2px solid var(--primary-color);
-  background-color: #e6f2ff !important;
+  background-color: var(--primary-light) !important;
 }
 
 /* --- ERGEBNIS-BEREICH --- */
@@ -85,14 +107,15 @@ p {
   border-radius: 8px;
   margin-top: 5px;
   margin-bottom: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Karte wirft leichten Schatten */
+  box-shadow: 0 2px 5px var(--shadow-light);
   display: flex;
-  justify-content: space-between; /* Text links, Zahl rechts */
+  justify-content: space-between;
   align-items: center;
 }
 
 #out_liter {
   font-size: 1.4rem;
+  color: var(--success-color);
 }
 
 /* --- BUTTONS --- */
@@ -100,7 +123,7 @@ button {
   width: 100%;
   padding: 16px;
   background-color: var(--success-color);
-  color: white;
+  color: var(--text-light);
   border: none;
   border-radius: 8px;
   font-size: 1.1rem;
@@ -108,18 +131,19 @@ button {
   cursor: pointer;
   margin-top: 10px;
   margin-bottom: 30px;
-  box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2);
+  box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2); /* Spezifischer Schatten */
+  transition: background-color 0.2s, transform 0.1s;
 }
 
 button:active {
-  background-color: #218838; /* Etwas dunkler beim Drauftippen */
-  transform: translateY(2px); /* Button drückt sich nach unten */
+  background-color: var(--success-hover);
+  transform: translateY(2px);
 }
 
 /* --- TRENNLINIEN --- */
 hr {
   border: none;
-  border-top: 1px dashed #cccccc;
+  border-top: 1px dashed var(--border-dark);
   margin: 25px 0;
 }
 
@@ -127,11 +151,11 @@ hr {
 details {
   background-color: var(--card-bg);
   border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-light);
   margin-top: 15px;
   margin-bottom: 20px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px var(--shadow-light);
 }
 
 summary {
@@ -140,16 +164,15 @@ summary {
   font-size: 0.95rem;
   color: var(--primary-color);
   cursor: pointer;
-  background-color: #f8f9fa;
+  background-color: var(--bg-secondary);
   user-select: none;
-  list-style-type: '▶ '; /* Standard-Pfeil */
+  list-style-type: '▶ ';
 }
 
-/* Wenn der Bereich geöffnet ist */
 details[open] summary {
   list-style-type: '▼ ';
-  border-bottom: 1px solid #e0e0e0;
-  background-color: #e6f2ff;
+  border-bottom: 1px solid var(--border-light);
+  background-color: var(--primary-light);
 }
 
 .details-content {
@@ -159,43 +182,30 @@ details[open] summary {
 /* --- SKIZZE IM AKKORDEON --- */
 .erklaer-bild {
   width: 100%;
-  max-width: 350px; /* Verhindert, dass es auf dem PC riesig wird */
+  max-width: 350px;
   height: auto;
   display: block;
-  margin: 0 auto 20px auto; /* Zentriert das Bild und schafft Abstand nach unten */
+  margin: 0 auto 20px auto;
   border-radius: 6px;
-  border: 1px solid #cccccc;
+  border: 1px solid var(--border-dark);
 }
 
-/* --- LÖSCHEN BUTTON --- */
+/* --- LÖSCHEN & ABMELDEN BUTTON --- */
 .btn-delete {
-  background-color: #dc3545; /* Warn-Rot */
+  background-color: var(--danger-color);
   margin-top: 10px;
   margin-bottom: 20px;
   padding: 12px;
   font-size: 1rem;
   box-shadow: 0 4px 6px rgba(220, 53, 69, 0.2);
 }
-
 .btn-delete:active {
-  background-color: #c82333; /* Dunkleres Rot beim Tippen */
+  background-color: var(--danger-hover);
 }
 
-/* --- AUTH BEREICH --- */
-.auth-container {
-  background-color: #f8f9fa;
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  margin-bottom: 20px;
-}
-.auth-container input {
-  display: block;
-  width: 100%;
-  margin-bottom: 10px;
-}
+/* --- AUTH BEREICH (Modal) --- */
 .btn-secondary {
-  background-color: #6c757d;
+  background-color: var(--secondary-color);
   margin-top: 10px;
 }
 
@@ -204,9 +214,8 @@ details[open] summary {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--bg-color); /* Dunkelblaues Design */
-  color: white;
-  padding: 10px 15px;
+  background-color: var(--bg-color);
+  padding: 10px 0;
   border-radius: 6px;
   margin-bottom: 20px;
 }
@@ -216,30 +225,31 @@ details[open] summary {
   color: var(--primary-color);
 }
 .btn-header {
-  background-color: var(--text-muted); /* Akzentfarbe für Login */
+  background-color: var(--warning-color); 
   padding: 8px 12px;
   margin: 0;
-  width: auto; /* Damit er nicht 100% Breite hat */
+  width: auto;
+  font-size: 0.95rem;
 }
 
 /* --- MODAL (Schwebendes Fenster) --- */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6); /* Dunkler, halbtransparenter Hintergrund */
+  background-color: var(--overlay-bg);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Stellt sicher, dass es ganz oben liegt */
+  z-index: 1000;
 }
 .modal-box {
-  background-color: white;
+  background-color: var(--card-bg);
   padding: 20px;
   border-radius: 8px;
   width: 90%;
   max-width: 400px;
   position: relative;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  box-shadow: 0 5px 15px var(--shadow-medium);
 }
 .close-btn {
   position: absolute;
@@ -247,11 +257,6 @@ details[open] summary {
   right: 15px;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #666;
+  color: var(--text-muted);
 }
-.close-btn:hover { color: #000; }
-.modal-box input {
-  display: block;
-  width: 100%;
-  margin-bottom: 10px;
-}
+.close-btn:hover { color: var(--text-main); }
