@@ -1,5 +1,20 @@
 const DB_KEY = "maischewagen_profile";
 
+// NEU: Unsere feste Liste von Standard-Fahrzeugen (Presets)
+const PRESETS = [
+  {
+    id: "preset_1",
+    name: "Zickler 50S (klein)",
+    B: 2.2, HD: 1.0, HR: 0.5, Lo: 4.0, Lu: 3.0, DS: 0.3
+  },
+  {
+    id: "preset_2",
+    name: "Zickler 50SH (groß)",
+    B: 2.2, HD: 1.0, HR: 0.8, Lo: 4.0, Lu: 3.0, DS: 0.3
+  }
+  // Du kannst hier später beliebig viele weitere hinzufügen!
+];
+
 // Wird aufgerufen, sobald die Seite geladen ist
 window.onload = function() {
   dropdownAktualisieren();
@@ -59,24 +74,32 @@ function wagenAuswaehlen() {
   const select = document.getElementById("wagenSelect");
   const gewaehlteId = select.value;
   
-  if (!gewaehlteId) return; // "Manuelle Eingabe" ausgewählt, wir tun nichts
+  if (!gewaehlteId) return; // "Manuelle Eingabe"
 
+  // Hole die lokalen Profile
   const profile = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
-  // Finde das Profil mit der ausgewählten ID
-  const wagen = profile.find(p => p.id == gewaehlteId);
+  
+  // Logik-Weiche: Suche den Wagen zuerst in den Presets...
+  let wagen = PRESETS.find(p => p.id === gewaehlteId);
+  
+  // ... wenn er da nicht ist, suche in den lokal gespeicherten Wägen
+  if (!wagen) {
+    wagen = profile.find(p => p.id == gewaehlteId);
+  }
 
+  // Wenn der Wagen gefunden wurde (egal aus welcher Liste), Felder ausfüllen
   if (wagen) {
-    // Felder mit den Werten aus der Datenbank überschreiben
     document.getElementById("inp_B").value = wagen.B;
     document.getElementById("inp_HD").value = wagen.HD;
     document.getElementById("inp_HR").value = wagen.HR;
     document.getElementById("inp_Lo").value = wagen.Lo;
     document.getElementById("inp_Lu").value = wagen.Lu;
-    document.getElementById("inp_DS").value = wagen.DS || 0.3;
     
-    // Nach dem Überschreiben sofort neu berechnen
+    // Fallback auf 0, falls ein alter gespeicherter Wagen noch keine Schnecke hatte
+    document.getElementById("inp_DS").value = wagen.DS || 0; 
+    
+    // Neu berechnen und das Maße-Akkordeon automatisch zuklappen
     neuBerechnen();
-    // Schließt das Ausklappmenü automatisch nach der Auswahl
     document.getElementById("masseDetails").removeAttribute("open");
   }
 }
@@ -114,18 +137,37 @@ function profilAnlegen() {
 }
 
 // 5. Dropdown mit allen gespeicherten Wagen füllen
+// Dropdown mit Presets und eigenen Wägen füllen
 function dropdownAktualisieren() {
   const select = document.getElementById("wagenSelect");
   const profile = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
   
-  // Leere das Dropdown (behalte nur die manuelle Option)
+  // Leere das Dropdown
   select.innerHTML = '<option value="">-- Manuelle Eingabe --</option>';
   
-  // Füge für jedes gespeicherte Profil eine Option hinzu
-  profile.forEach(wagen => {
-    const option = document.createElement("option");
-    option.value = wagen.id;
-    option.text = wagen.name;
-    select.appendChild(option);
-  });
+  // 1. Kategorie: Die globalen Presets hinzufügen
+  if (PRESETS.length > 0) {
+    const groupPresets = document.createElement("optgroup");
+    groupPresets.label = "Standard-Modelle";
+    PRESETS.forEach(wagen => {
+      const option = document.createElement("option");
+      option.value = wagen.id;
+      option.text = wagen.name;
+      groupPresets.appendChild(option);
+    });
+    select.appendChild(groupPresets);
+  }
+  
+  // 2. Kategorie: Die lokal gespeicherten Wägen des Nutzers
+  if (profile.length > 0) {
+    const groupEigene = document.createElement("optgroup");
+    groupEigene.label = "Meine gespeicherten Wägen";
+    profile.forEach(wagen => {
+      const option = document.createElement("option");
+      option.value = wagen.id;
+      option.text = wagen.name;
+      groupEigene.appendChild(option);
+    });
+    select.appendChild(groupEigene);
+  }
 }
