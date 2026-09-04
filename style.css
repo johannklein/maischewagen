@@ -121,3 +121,36 @@ hr {
   border-top: 1px dashed #cccccc;
   margin: 25px 0;
 }
+
+/* --- EINKLAPPBARER BEREICH (Akkordeon) --- */
+details {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  margin-top: 15px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+summary {
+  padding: 14px 16px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  color: var(--primary-color);
+  cursor: pointer;
+  background-color: #f8f9fa;
+  user-select: none;
+  list-style-type: '▶ '; /* Standard-Pfeil */
+}
+
+/* Wenn der Bereich geöffnet ist */
+details[open] summary {
+  list-style-type: '▼ ';
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #e6f2ff;
+}
+
+.details-content {
+  padding: 15px;
+}

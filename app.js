@@ -66,6 +66,8 @@ function wagenAuswaehlen() {
     
     // Nach dem Überschreiben sofort neu berechnen
     neuBerechnen();
+    // Schließt das Ausklappmenü automatisch nach der Auswahl
+    document.getElementById("masseDetails").removeAttribute("open");
   }
 }
 
