@@ -26,6 +26,7 @@ Die App berücksichtig sowohl den dreieckigen (unteren) als auch den rechteckige
 1. **Gesamthöhe:** $H_{ges} = H_D + H_R$
 2. **Füllhöhe:** $h = H_{ges} - d$ (begrenzt auf $0 \dots H_{ges}$)
 3. **Volumen:** Berechnung über die veränderliche Breite und Länge je nach Füllhöhe.
+4. **Förderschnecke:** Berechnung über $L_u$ (Länge unten) und $D_S$ (Durchmesser Förderschnecke)
 
 ---
 
