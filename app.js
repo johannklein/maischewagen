@@ -6,8 +6,8 @@ window.onload = function() {
   neuBerechnen(); // Einmal initial rechnen mit den Standardwerten
 };
 
-// 1. Die reine Mathematik (wie vorher)
-function berechneMaische(B, HD, HR, Lo, Lu, d_cm, dichte = 1000) {
+// 1. Die reine Mathematik (wie vorher), mit Schnecke Standard-Wert 30cm
+function berechneMaische(B, HD, HR, Lo, Lu, d_cm, D_schnecke = 0.3, dichte = 1000) {
   const H_ges = HD + HR;
   const h = Math.max(0, Math.min(H_ges, H_ges - (d_cm / 100)));
   const k = H_ges > 0 ? (Lo - Lu) / H_ges : 0;
@@ -21,7 +21,15 @@ function berechneMaische(B, HD, HR, Lo, Lu, d_cm, dichte = 1000) {
     v_m3 = v_unten + v_oben;
   }
 
-  const liter = Math.round(v_m3 * 1000);
+// NEU: Schneckenvolumen berechnen und abziehen
+  let end_v_m3 = v_m3;
+  if (h > 0) { // Nur abziehen, wenn überhaupt Maische im Wagen ist
+    const radius = D_schnecke / 2;
+    const v_schnecke_m3 = Math.PI * Math.pow(radius, 2) * Lu; 
+    end_v_m3 = Math.max(0, v_m3 - v_schnecke_m3); // Verhindert negative Werte
+  }
+
+  const liter = Math.round((end_v_m3 * 1000));
   const gewicht = Math.round((liter * dichte) / 1000);
   return { fuellhoehe: h.toFixed(2), liter, gewicht };
 }
@@ -34,10 +42,11 @@ function neuBerechnen() {
   const HR = parseFloat(document.getElementById("inp_HR").value) || 0;
   const Lo = parseFloat(document.getElementById("inp_Lo").value) || 0;
   const Lu = parseFloat(document.getElementById("inp_Lu").value) || 0;
+  const DS = parseFloat(document.getElementById("inp_DS").value) || 0; // NEU
   const d_cm = parseFloat(document.getElementById("inp_d").value) || 0;
 
   // Rechnen
-  const ergebnis = berechneMaische(B, HD, HR, Lo, Lu, d_cm);
+  const ergebnis = berechneMaische(B, HD, HR, Lo, Lu, d_cm, DS);
 
   // Ergebnis in die HTML-Seite schreiben
   document.getElementById("out_h").innerText = ergebnis.fuellhoehe;
@@ -63,6 +72,7 @@ function wagenAuswaehlen() {
     document.getElementById("inp_HR").value = wagen.HR;
     document.getElementById("inp_Lo").value = wagen.Lo;
     document.getElementById("inp_Lu").value = wagen.Lu;
+    document.getElementById("inp_DS").value = wagen.DS || 0.3;
     
     // Nach dem Überschreiben sofort neu berechnen
     neuBerechnen();
@@ -86,7 +96,8 @@ function profilAnlegen() {
     HD: parseFloat(document.getElementById("inp_HD").value) || 0,
     HR: parseFloat(document.getElementById("inp_HR").value) || 0,
     Lo: parseFloat(document.getElementById("inp_Lo").value) || 0,
-    Lu: parseFloat(document.getElementById("inp_Lu").value) || 0
+    Lu: parseFloat(document.getElementById("inp_Lu").value) || 0,
+    DS: parseFloat(document.getElementById("inp_DS").value) || 0
   };
 
   const profile = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
