@@ -176,7 +176,7 @@ async function dropdownAktualisieren() {
   
   if (PRESETS.length > 0) {
     const groupPresets = document.createElement("optgroup");
-    groupPresets.label = "🌟 Standard-Modelle";
+    groupPresets.label = "Standard-Modelle";
     PRESETS.forEach(wagen => {
       const option = document.createElement("option");
       option.value = wagen.id;
@@ -188,7 +188,7 @@ async function dropdownAktualisieren() {
   
   if (cloudProfile.length > 0) {
     const groupEigene = document.createElement("optgroup");
-    groupEigene.label = "☁️ Cloud-Wägen";
+    groupEigene.label = "Cloud-Wägen";
     cloudProfile.forEach(wagen => {
       const option = document.createElement("option");
       option.value = wagen.id;
@@ -229,14 +229,24 @@ async function profilLoeschen() {
 
 // Zeigt oder versteckt das Login-Fenster
 function authUiAktualisieren() {
+  const btnHeader = document.getElementById("btn_open_login");
+  
   if (currentUser) {
     document.getElementById('loggedOutView').style.display = 'none';
     document.getElementById('loggedInView').style.display = 'block';
     document.getElementById('userEmail').innerText = currentUser.email;
+    
+    // Header-Button anpassen
+    btnHeader.innerText = "⚙️ " + currentUser.email.split('@')[0]; // Zeigt z.B. "⚙️ test"
+    btnHeader.style.backgroundColor = "#27ae60"; // Grüner Button, wenn eingeloggt
   } else {
     document.getElementById('loggedOutView').style.display = 'block';
     document.getElementById('loggedInView').style.display = 'none';
     document.getElementById('userEmail').innerText = '';
+    
+    // Header-Button anpassen
+    btnHeader.innerText = "👤 Login";
+    btnHeader.style.backgroundColor = "#f39c12"; // Oranger Button für Gäste
   }
 }
 
@@ -266,4 +276,11 @@ async function login() {
 // Ausloggen
 async function logout() {
   await db.auth.signOut();
+}
+
+function modalOeffnen() {
+  document.getElementById("loginModal").style.display = "flex";
+}
+function modalSchliessen() {
+  document.getElementById("loginModal").style.display = "none";
 }

@@ -9,29 +9,13 @@
 </head>
 
 <body>
-  <!-- NEU: Login-Bereich -->
-  <div class="auth-container">
-    
-    <!-- Ansicht für GÄSTE -->
-    <div id="loggedOutView">
-      <h3>☁️ Cloud-Sync & Team-Funktion</h3>
-      <p style="font-size: 0.85em; color: gray; margin-bottom: 10px;">Melde dich an, um die Flotte deines Weinguts für alle Mitarbeiter zu verwalten.</p>
-      <input type="email" id="emailInput" placeholder="E-Mail Adresse">
-      <input type="password" id="passwordInput" placeholder="Passwort">
-      <button onclick="login()">Einloggen</button>
-      <button onclick="register()" class="btn-secondary">Neues Weingut registrieren</button>
-    </div>
+  <!-- NEU: Die Kopfzeile (Header) -->
+  <header class="app-header">
+    <h1>Maischewagen Rechner</h1>
+    <!-- Der kleine Button oben rechts -->
+    <button id="btn_open_login" class="btn-header" onclick="modalOeffnen()">👤 Login</button>
+  </header>
 
-    <!-- Ansicht für EINGELOGGTE -->
-    <div id="loggedInView" style="display: none;">
-      <h3>☁️ Verbunden</h3>
-      <p>Eingeloggt als: <strong id="userEmail"></strong></p>
-      <button onclick="logout()" class="btn-delete">Abmelden</button>
-    </div>
-    
-  </div>
-  <hr>
-  
   <h2>1. Wagen auswählen (Optional)</h2>
   <!-- Wenn hier etwas gewählt wird, überschreibt es die Felder unten -->
 <!-- Das Dropdown-Menü -->
@@ -96,5 +80,34 @@
   <button onclick="profilAnlegen()">Lokales Profil speichern</button>
 
   <script src="app.js"></script>
+
+  <!-- NEU: Das schwebende Login-Fenster (Modal) -->
+  <div id="loginModal" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+      <!-- Der Schließen-Knopf (X) -->
+      <span class="close-btn" onclick="modalSchliessen()">&times;</span>
+      
+      <!-- Ansicht für GÄSTE -->
+      <div id="loggedOutView">
+        <h3>☁️ Cloud-Sync & Team-Funktion</h3>
+        <p style="font-size: 0.85em; color: gray; margin-bottom: 10px;">Melde dich an, um die Flotte deines Weinguts zentral zu verwalten.</p>
+        <input type="email" id="emailInput" placeholder="E-Mail Adresse">
+        <input type="password" id="passwordInput" placeholder="Passwort">
+        <button onclick="login()">Einloggen</button>
+        <button onclick="register()" class="btn-secondary">Neues Weingut registrieren</button>
+      </div>
+
+      <!-- Ansicht für EINGELOGGTE -->
+      <div id="loggedInView" style="display: none;">
+        <h3>☁️ Verbunden</h3>
+        <p>Eingeloggt als: <strong id="userEmail"></strong></p>
+        <button onclick="logout()" class="btn-delete">Abmelden</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
 </body>
 </html>
