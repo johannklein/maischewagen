@@ -180,3 +180,20 @@ details[open] summary {
   background-color: #c82333; /* Dunkleres Rot beim Tippen */
 }
 
+/* --- AUTH BEREICH --- */
+.auth-container {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 20px;
+}
+.auth-container input {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+}
+.btn-secondary {
+  background-color: #6c757d;
+  margin-top: 10px;
+}

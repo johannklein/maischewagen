@@ -3,7 +3,7 @@ const supabaseUrl = 'https://fpjvswrczniesuttrmvx.supabase.co'; // z.B. 'https:/
 const supabaseKey = 'sb_publishable_E7LtJBfyS5pkud85etUnsQ_1Y1ZTY2B';
 const db = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-// ... danach kommt dein bisheriger Code (DB_KEY, PRESETS etc.)
+let currentUser = null; // Speichert den aktuell eingeloggten Nutzer
 
 const DB_KEY = "maischewagen_profile";
 
@@ -25,9 +25,21 @@ const PRESETS = [
 // --- NEU: Globale Variable für unsere Cloud-Daten ---
 let cloudProfile = []; 
 
-// 1. App-Start (Wartet jetzt auf die Cloud)
+// 1. App-Start
 window.onload = async function() {
-  await dropdownAktualisieren(); // Zieht die Daten aus Supabase
+  // 1. Prüfen, ob wir schon eingeloggt sind
+  const { data: { session } } = await db.auth.getSession();
+  currentUser = session ? session.user : null;
+  authUiAktualisieren();
+
+  // 2. Supabase sagen: "Sag mir Bescheid, wenn sich der Login-Status ändert"
+  db.auth.onAuthStateChange((event, session) => {
+    currentUser = session ? session.user : null;
+    authUiAktualisieren();
+    dropdownAktualisieren(); // Dropdown neu laden!
+  });
+
+  await dropdownAktualisieren();
   neuBerechnen();
 };
 
@@ -211,4 +223,47 @@ async function profilLoeschen() {
   await dropdownAktualisieren();
   select.value = ""; 
   document.getElementById("btn_loeschen").style.display = "none";
+}
+
+// --- NEU: AUTHENTIFIZIERUNG ---
+
+// Zeigt oder versteckt das Login-Fenster
+function authUiAktualisieren() {
+  if (currentUser) {
+    document.getElementById('loggedOutView').style.display = 'none';
+    document.getElementById('loggedInView').style.display = 'block';
+    document.getElementById('userEmail').innerText = currentUser.email;
+  } else {
+    document.getElementById('loggedOutView').style.display = 'block';
+    document.getElementById('loggedInView').style.display = 'none';
+    document.getElementById('userEmail').innerText = '';
+  }
+}
+
+// Registrieren
+async function register() {
+  const email = document.getElementById('emailInput').value;
+  const password = document.getElementById('passwordInput').value;
+  
+  if(!email || !password) return alert("Bitte E-Mail und Passwort eingeben!");
+
+  const { data, error } = await db.auth.signUp({ email, password });
+  if (error) alert("Fehler: " + error.message);
+  else alert("Erfolgreich registriert!");
+}
+
+// Einloggen
+async function login() {
+  const email = document.getElementById('emailInput').value;
+  const password = document.getElementById('passwordInput').value;
+  
+  if(!email || !password) return alert("Bitte E-Mail und Passwort eingeben!");
+
+  const { data, error } = await db.auth.signInWithPassword({ email, password });
+  if (error) alert("Fehler: " + error.message);
+}
+
+// Ausloggen
+async function logout() {
+  await db.auth.signOut();
 }
