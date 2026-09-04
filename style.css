@@ -154,3 +154,15 @@ details[open] summary {
 .details-content {
   padding: 15px;
 }
+
+/* --- SKIZZE IM AKKORDEON --- */
+.erklaer-bild {
+  width: 100%;
+  max-width: 350px; /* Verhindert, dass es auf dem PC riesig wird */
+  height: auto;
+  display: block;
+  margin: 0 auto 20px auto; /* Zentriert das Bild und schafft Abstand nach unten */
+  border-radius: 6px;
+  border: 1px solid #cccccc;
+}
+
