@@ -43,7 +43,7 @@ window.onload = async function() {
   neuBerechnen();
 };
 
-// 1. Die reine Mathematik (wie vorher), mit Schnecke Standard-Wert 30cm
+// 2. Die reine Mathematik (wie vorher), mit Schnecke Standard-Wert 30cm
 function berechneMaische(B, HD, HR, Lo, Lu, d_cm, D_schnecke = 0.3, dichte = 1000) {
   const H_ges = HD + HR;
   const h = Math.max(0, Math.min(H_ges, H_ges - (d_cm / 100)));
@@ -71,7 +71,7 @@ function berechneMaische(B, HD, HR, Lo, Lu, d_cm, D_schnecke = 0.3, dichte = 100
   return { fuellhoehe: h.toFixed(2), liter, gewicht };
 }
 
-// 2. Werte aus den Feldern holen, rechnen und Ergebnis anzeigen (Bleibt fast gleich)
+// 3. Werte aus den Feldern holen, rechnen und Ergebnis anzeigen (Bleibt fast gleich)
 function neuBerechnen() {
   const B = parseFloat(document.getElementById("inp_B").value) || 0;
   const HD = parseFloat(document.getElementById("inp_HD").value) || 0;
@@ -88,7 +88,104 @@ function neuBerechnen() {
   document.getElementById("out_gewicht").innerText = ergebnis.gewicht.toLocaleString("de-DE");
 }
 
-// 3. Dropdown-Logik: Wagen auswählen
+// 4. HYBRID-SPEICHERN: Neuen Wagen anlegen
+async function profilAnlegen() {
+  const name = document.getElementById("w_name").value.trim();
+  if (!name) {
+    alert("Bitte gib einen Namen für den Wagen ein!");
+    return;
+  }
+
+  const neuerWagen = {
+    name: name,
+    B: parseFloat(document.getElementById("inp_B").value) || 0,
+    HD: parseFloat(document.getElementById("inp_HD").value) || 0,
+    HR: parseFloat(document.getElementById("inp_HR").value) || 0,
+    Lo: parseFloat(document.getElementById("inp_Lo").value) || 0,
+    Lu: parseFloat(document.getElementById("inp_Lu").value) || 0,
+    DS: parseFloat(document.getElementById("inp_DS").value) || 0
+  };
+
+  if (currentUser) {
+    // CLOUD SPEICHERN (Eingeloggt)
+    const { error } = await db.from('fahrzeuge').insert([neuerWagen]);
+    if (error) {
+      alert("Fehler beim Speichern in der Cloud: " + error.message);
+      return;
+    }
+    alert('Wagen "' + name + '" wurde für dein Team in der Cloud gespeichert!');
+  } else {
+    // LOKAL SPEICHERN (Gast)
+    neuerWagen.id = "local_" + Date.now(); // Wir geben ihm eine eindeutige lokale ID
+    let localProfile = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+    localProfile.push(neuerWagen);
+    localStorage.setItem(DB_KEY, JSON.stringify(localProfile));
+    alert('Wagen "' + name + '" wurde lokal auf diesem Gerät gespeichert!');
+  }
+
+  document.getElementById("w_name").value = "";
+  await dropdownAktualisieren();
+}
+
+
+// 5. HYBRID-LADEN: Dropdown füllen
+async function dropdownAktualisieren() {
+  const select = document.getElementById("wagenSelect");
+  
+  // A. Cloud-Daten holen (nur wenn eingeloggt)
+  cloudProfile = [];
+  if (currentUser) {
+    const { data, error } = await db.from('fahrzeuge').select('*');
+    if (!error && data) cloudProfile = data;
+  }
+
+  // B. Lokale Daten holen
+  const localProfile = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+
+  select.innerHTML = '<option value="">-- Manuelle Eingabe --</option>';
+  
+  // Kategorie 1: Presets
+  if (PRESETS.length > 0) {
+    const groupPresets = document.createElement("optgroup");
+    groupPresets.label = "Standard-Modelle";
+    PRESETS.forEach(wagen => {
+      const option = document.createElement("option");
+      option.value = wagen.id;
+      option.text = wagen.name;
+      groupPresets.appendChild(option);
+    });
+    select.appendChild(groupPresets);
+  }
+
+  // Kategorie 2: Lokale Wägen
+  if (localProfile.length > 0) {
+    const groupLocal = document.createElement("optgroup");
+    groupLocal.label = "Meine lokalen Wägen (Nur hier)";
+    localProfile.forEach(wagen => {
+      const option = document.createElement("option");
+      option.value = wagen.id;
+      option.text = wagen.name;
+      groupLocal.appendChild(option);
+    });
+    select.appendChild(groupLocal);
+  }
+  
+  // Kategorie 3: Cloud Wägen
+  if (cloudProfile.length > 0) {
+    const groupCloud = document.createElement("optgroup");
+    groupCloud.label = "Cloud-Wägen (Team)";
+    cloudProfile.forEach(wagen => {
+      const option = document.createElement("option");
+      option.value = wagen.id;
+      option.text = wagen.name;
+      groupCloud.appendChild(option);
+    });
+    select.appendChild(groupCloud);
+  }
+}
+
+
+// 3. HYBRID-AUSWÄHLEN (Muss wissen, woher der Wagen kommt)
 function wagenAuswaehlen() {
   const select = document.getElementById("wagenSelect");
   const gewaehlteId = select.value;
@@ -99,16 +196,18 @@ function wagenAuswaehlen() {
     return;
   }
 
-  // Suche in Presets (mit === weil beides Texte sind)
+  const localProfile = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+  
+  // 1. Zuerst bei den unlöschbaren Presets gucken
   let wagen = PRESETS.find(p => p.id === gewaehlteId);
   
   if (wagen) {
     btnLoeschen.style.display = "none";
   } else {
-    // Suche in Cloud-Profilen (mit == weil IDs aus Supabase evtl. Zahlen sind)
-    wagen = cloudProfile.find(p => p.id == gewaehlteId);
+    // 2. Wenn nicht Preset, dann in Cloud ODER Lokal suchen
+    wagen = cloudProfile.find(p => p.id == gewaehlteId) || localProfile.find(p => p.id === gewaehlteId);
     if (wagen) {
-      btnLoeschen.style.display = "block";
+      btnLoeschen.style.display = "block"; // Löschen erlauben
     }
   }
 
@@ -125,128 +224,68 @@ function wagenAuswaehlen() {
   }
 }
 
-// 4. CLOUD-SPEICHERN: Neuen Wagen anlegen
-async function profilAnlegen() {
-  const name = document.getElementById("w_name").value.trim();
-  if (!name) {
-    alert("Bitte gib einen Namen für den Wagen ein!");
-    return;
-  }
 
-  // Wir verpacken die Maße für Supabase (ID wird von Supabase automatisch erzeugt!)
-  const neuerWagen = {
-    name: name,
-    B: parseFloat(document.getElementById("inp_B").value) || 0,
-    HD: parseFloat(document.getElementById("inp_HD").value) || 0,
-    HR: parseFloat(document.getElementById("inp_HR").value) || 0,
-    Lo: parseFloat(document.getElementById("inp_Lo").value) || 0,
-    Lu: parseFloat(document.getElementById("inp_Lu").value) || 0,
-    DS: parseFloat(document.getElementById("inp_DS").value) || 0
-  };
-
-  // Befehl an Supabase: Füge diese Zeile in die Tabelle 'fahrzeuge' ein
-  const { error } = await db.from('fahrzeuge').insert([neuerWagen]);
-
-  if (error) {
-    alert("Fehler beim Speichern: " + error.message);
-    return;
-  }
-
-  document.getElementById("w_name").value = "";
-  await dropdownAktualisieren(); // Dropdown aktualisieren
-  alert('Wagen "' + name + '" wurde erfolgreich in der Cloud gespeichert!');
-}
-
-// 5. CLOUD-LADEN: Dropdown füllen
-async function dropdownAktualisieren() {
-  const select = document.getElementById("wagenSelect");
-  
-  // Befehl an Supabase: Lese (*) alle Zeilen aus der Tabelle 'fahrzeuge'
-  const { data, error } = await db.from('fahrzeuge').select('*');
-  
-  if (error) {
-    console.error("Fehler beim Laden aus Supabase:", error);
-    return;
-  }
-  
-  // Wir speichern die geladenen Daten in unserer Variable
-  cloudProfile = data || [];
-
-  select.innerHTML = '<option value="">-- Manuelle Eingabe --</option>';
-  
-  if (PRESETS.length > 0) {
-    const groupPresets = document.createElement("optgroup");
-    groupPresets.label = "Standard-Modelle";
-    PRESETS.forEach(wagen => {
-      const option = document.createElement("option");
-      option.value = wagen.id;
-      option.text = wagen.name;
-      groupPresets.appendChild(option);
-    });
-    select.appendChild(groupPresets);
-  }
-  
-  if (cloudProfile.length > 0) {
-    const groupEigene = document.createElement("optgroup");
-    groupEigene.label = "Cloud-Wägen";
-    cloudProfile.forEach(wagen => {
-      const option = document.createElement("option");
-      option.value = wagen.id;
-      option.text = wagen.name;
-      groupEigene.appendChild(option);
-    });
-    select.appendChild(groupEigene);
-  }
-}
-
-// 6. CLOUD-LÖSCHEN
+// 6. HYBRID-LÖSCHEN
 async function profilLoeschen() {
   const select = document.getElementById("wagenSelect");
   const gewaehlteId = select.value;
 
   if (!gewaehlteId) return;
 
-  const bestaetigt = confirm("Möchtest du diesen Wagen aus der Cloud löschen? Er verschwindet dann für alle Nutzer.");
+  const bestaetigt = confirm("Möchtest du diesen Wagen wirklich löschen?");
   if (!bestaetigt) return; 
 
-  // Befehl an Supabase: Lösche die Zeile, wo die ID gleich der gewählten ID ist
-  const { error } = await db
-    .from('fahrzeuge')
-    .delete()
-    .eq('id', gewaehlteId);
-
-  if (error) {
-    alert("Fehler beim Löschen: " + error.message);
-    return;
+  // Wir prüfen am Namen der ID, ob es ein lokaler Wagen ist
+  if (String(gewaehlteId).startsWith("local_")) {
+    let localProfile = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+    localProfile = localProfile.filter(w => w.id !== gewaehlteId);
+    localStorage.setItem(DB_KEY, JSON.stringify(localProfile));
+  } else {
+    // Wenn nicht, ist es ein Cloud-Wagen -> aus Supabase löschen
+    const { error } = await db.from('fahrzeuge').delete().eq('id', gewaehlteId);
+    if (error) {
+      alert("Fehler beim Löschen aus der Cloud: " + error.message);
+      return;
+    }
   }
 
   await dropdownAktualisieren();
   select.value = ""; 
   document.getElementById("btn_loeschen").style.display = "none";
 }
-
 // --- NEU: AUTHENTIFIZIERUNG ---
 
 // Zeigt oder versteckt das Login-Fenster
 function authUiAktualisieren() {
   const btnHeader = document.getElementById("btn_open_login");
+  const btnSave = document.getElementById("btn_save");   // NEU: Speichern-Button
+  const saveHint = document.getElementById("saveHint"); // NEU: Erklär-Text
   
   if (currentUser) {
     document.getElementById('loggedOutView').style.display = 'none';
     document.getElementById('loggedInView').style.display = 'block';
     document.getElementById('userEmail').innerText = currentUser.email;
     
-    // Header-Button anpassen (Grün via CSS Variable)
+    // Header-Button anpassen (Grün)
     btnHeader.innerText = "⚙️ " + currentUser.email.split('@')[0];
     btnHeader.style.backgroundColor = "var(--success-color)";
+
+    // NEU: Speichern-Bereich auf CLOUD umschalten
+    if(btnSave) btnSave.innerText = "☁️ Fürs Team in der Cloud speichern";
+    if(saveHint) saveHint.innerText = "Speichert den Wagen sicher in der Cloud, sichtbar für alle Mitarbeiter deines Weinguts.";
+    
   } else {
     document.getElementById('loggedOutView').style.display = 'block';
     document.getElementById('loggedInView').style.display = 'none';
     document.getElementById('userEmail').innerText = '';
     
-    // Header-Button anpassen (Orange via CSS Variable)
+    // Header-Button anpassen (Orange)
     btnHeader.innerText = "👤 Login";
     btnHeader.style.backgroundColor = "var(--primary-color)";
+
+    // NEU: Speichern-Bereich auf LOKAL umschalten
+    if(btnSave) btnSave.innerText = "💾 Lokal auf diesem Gerät speichern";
+    if(saveHint) saveHint.innerText = "Speichert die Maße nur hier im Browser-Cache. Für Team-Synchronisation bitte oben einloggen!";
   }
 }
 
@@ -260,6 +299,7 @@ async function register() {
   const { data, error } = await db.auth.signUp({ email, password });
   if (error) alert("Fehler: " + error.message);
   else alert("Erfolgreich registriert!");
+  modalSchliessen();
 }
 
 // Einloggen
@@ -271,11 +311,13 @@ async function login() {
 
   const { data, error } = await db.auth.signInWithPassword({ email, password });
   if (error) alert("Fehler: " + error.message);
+  modalSchliessen();
 }
 
 // Ausloggen
 async function logout() {
   await db.auth.signOut();
+  modalSchliessen();
 }
 
 function modalOeffnen() {

@@ -73,12 +73,16 @@
   <p>Volumen: <strong id="out_liter" style="font-size: 1.2em; color: green;">0</strong> Liter</p>
   <p>Gewicht (bei 1000 kg/m³): <strong id="out_gewicht">0</strong> kg</p>
 
-  <hr>
-  <h2>4. Aktuelle Maße lokal speichern</h2>
-  <p style="font-size: 0.9em; color: gray;">Speichert die oben stehenden Maße für die Zukunft ab.</p>
+<hr>
+  <h2>4. Aktuelle Maße speichern</h2>
+  <!-- Dieser Text ändert sich gleich automatisch -->
+  <p id="saveHint" style="font-size: 0.9em; color: gray;">Speichert die Maße nur auf diesem Gerät. Logge dich für Team-Sync ein!</p>
+  
   <input type="text" id="w_name" placeholder="Name (z.B. Maischewagen Groß)">
-  <button onclick="profilAnlegen()">Lokales Profil speichern</button>
-
+  
+  <!-- Dieser Button ändert sich gleich automatisch -->
+  <button id="btn_save" onclick="profilAnlegen()">💾 Lokal speichern</button>
+  
   <script src="app.js"></script>
 
   <!-- NEU: Das schwebende Login-Fenster (Modal) -->
