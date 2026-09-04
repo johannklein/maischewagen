@@ -12,7 +12,8 @@ Der **Maischewagen Rechner** dient zur einfachen Füllstandsberechnung direkt im
 
 ### ✨ Funktionen
 - 📏 **Echtzeit-Berechnung:** Sofortige Aktualisierung von Füllhöhe ($h$), Volumen (Liter) und Gewicht (kg) beim Tippen.
-- 💾 **Wagen-Profile speichern:** Fahrzeugdaten ($B, H_D, H_R, L_o, L_u$) abspeichern und bequem per Dropdown auswählen.
+- 💾 **Presets:** Standardisierte Fahrzeugdaten ($B, H_D, H_R, L_o, L_u$) sind bereits vorhanden, es kann direkt losgehen!
+- 💾 **Eigene Wagen-Profile speichern:** Fahrzeugdaten ($B, H_D, H_R, L_o, L_u$) abspeichern und bequem per Dropdown auswählen. Nur Lokal, keine Cloud! 
 - 📱 **Mobile First:** Optimiert für Smartphones und die schnelle Nutzung auf dem Feld.
 - 🔒 **Datenschutz & Offline-ready:** Alle gespeicherten Profile bleiben lokal auf dem eigenen Smartphone/Browser (`localStorage`).
 
@@ -20,7 +21,7 @@ Der **Maischewagen Rechner** dient zur einfachen Füllstandsberechnung direkt im
 
 ## 📐 Mathematisches Modell
 
-Die App berücksichtig sowohl den dreieckigen (unteren) als auch den rechteckigen (oberen) Querschnitt des Wagens sowie eine eventuelle Längenneigung:
+Die App berücksichtig sowohl den dreieckigen (unteren) als auch den rechteckigen (oberen) Querschnitt des Wagens sowie eine eventuelle Längenneigung. Außerdem wird das Volumen der eventuell vorhandenen Förderschnecke abgezogen.
 
 1. **Gesamthöhe:** $H_{ges} = H_D + H_R$
 2. **Füllhöhe:** $h = H_{ges} - d$ (begrenzt auf $0 \dots H_{ges}$)
