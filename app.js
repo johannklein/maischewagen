@@ -1,3 +1,10 @@
+// --- CLOUD DATENBANK VERBINDUNG ---
+const supabaseUrl = 'https://fpjvswrczniesuttrmvx.supabase.co'; // z.B. 'https://asdfghjkl.supabase.co'
+const supabaseKey = 'sb_publishable_E7LtJBfyS5pkud85etUnsQ_1Y1ZTY2B';
+const db = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+// ... danach kommt dein bisheriger Code (DB_KEY, PRESETS etc.)
+
 const DB_KEY = "maischewagen_profile";
 
 // NEU: Unsere feste Liste von Standard-Fahrzeugen (Presets)
@@ -15,10 +22,13 @@ const PRESETS = [
   // Du kannst hier später beliebig viele weitere hinzufügen!
 ];
 
-// Wird aufgerufen, sobald die Seite geladen ist
-window.onload = function() {
-  dropdownAktualisieren();
-  neuBerechnen(); // Einmal initial rechnen mit den Standardwerten
+// --- NEU: Globale Variable für unsere Cloud-Daten ---
+let cloudProfile = []; 
+
+// 1. App-Start (Wartet jetzt auf die Cloud)
+window.onload = async function() {
+  await dropdownAktualisieren(); // Zieht die Daten aus Supabase
+  neuBerechnen();
 };
 
 // 1. Die reine Mathematik (wie vorher), mit Schnecke Standard-Wert 30cm
@@ -49,56 +59,47 @@ function berechneMaische(B, HD, HR, Lo, Lu, d_cm, D_schnecke = 0.3, dichte = 100
   return { fuellhoehe: h.toFixed(2), liter, gewicht };
 }
 
-// 2. Werte aus den Feldern holen, rechnen und Ergebnis anzeigen
+// 2. Werte aus den Feldern holen, rechnen und Ergebnis anzeigen (Bleibt fast gleich)
 function neuBerechnen() {
-  // Lese die aktuellen Werte aus den Eingabefeldern
   const B = parseFloat(document.getElementById("inp_B").value) || 0;
   const HD = parseFloat(document.getElementById("inp_HD").value) || 0;
   const HR = parseFloat(document.getElementById("inp_HR").value) || 0;
   const Lo = parseFloat(document.getElementById("inp_Lo").value) || 0;
   const Lu = parseFloat(document.getElementById("inp_Lu").value) || 0;
-  const DS = parseFloat(document.getElementById("inp_DS").value) || 0; // NEU
+  const DS = parseFloat(document.getElementById("inp_DS").value) || 0;
   const d_cm = parseFloat(document.getElementById("inp_d").value) || 0;
 
-  // Rechnen
   const ergebnis = berechneMaische(B, HD, HR, Lo, Lu, d_cm, DS);
 
-  // Ergebnis in die HTML-Seite schreiben
   document.getElementById("out_h").innerText = ergebnis.fuellhoehe;
   document.getElementById("out_liter").innerText = ergebnis.liter.toLocaleString("de-DE");
   document.getElementById("out_gewicht").innerText = ergebnis.gewicht.toLocaleString("de-DE");
 }
 
-// 3. Dropdown-Logik: Ein Profil aus der Liste auswählen
+// 3. Dropdown-Logik: Wagen auswählen
 function wagenAuswaehlen() {
   const select = document.getElementById("wagenSelect");
   const gewaehlteId = select.value;
-  const btnLoeschen = document.getElementById("btn_loeschen"); // Den Button suchen
+  const btnLoeschen = document.getElementById("btn_loeschen");
   
-  // Wenn "Manuelle Eingabe" gewählt ist
   if (!gewaehlteId) {
     btnLoeschen.style.display = "none"; 
     return;
   }
 
-  const profile = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
-  
-  // Prüfen, ob es ein Preset ist
+  // Suche in Presets (mit === weil beides Texte sind)
   let wagen = PRESETS.find(p => p.id === gewaehlteId);
   
   if (wagen) {
-    // Es ist ein Preset -> Löschen verbieten (Button verstecken)
     btnLoeschen.style.display = "none";
   } else {
-    // Es ist kein Preset, also in eigenen Profilen suchen
-    wagen = profile.find(p => p.id == gewaehlteId);
+    // Suche in Cloud-Profilen (mit == weil IDs aus Supabase evtl. Zahlen sind)
+    wagen = cloudProfile.find(p => p.id == gewaehlteId);
     if (wagen) {
-      // Eigener Wagen -> Löschen erlauben (Button anzeigen)
       btnLoeschen.style.display = "block";
     }
   }
 
-  // Felder ausfüllen
   if (wagen) {
     document.getElementById("inp_B").value = wagen.B;
     document.getElementById("inp_HD").value = wagen.HD;
@@ -112,16 +113,16 @@ function wagenAuswaehlen() {
   }
 }
 
-// 4. Aktuelle Werte als neues Profil speichern
-function profilAnlegen() {
+// 4. CLOUD-SPEICHERN: Neuen Wagen anlegen
+async function profilAnlegen() {
   const name = document.getElementById("w_name").value.trim();
   if (!name) {
     alert("Bitte gib einen Namen für den Wagen ein!");
     return;
   }
 
-  const wagen = {
-    id: Date.now(), // Erzeugt eine einzigartige ID
+  // Wir verpacken die Maße für Supabase (ID wird von Supabase automatisch erzeugt!)
+  const neuerWagen = {
     name: name,
     B: parseFloat(document.getElementById("inp_B").value) || 0,
     HD: parseFloat(document.getElementById("inp_HD").value) || 0,
@@ -131,32 +132,39 @@ function profilAnlegen() {
     DS: parseFloat(document.getElementById("inp_DS").value) || 0
   };
 
-  const profile = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
-  profile.push(wagen);
-  localStorage.setItem(DB_KEY, JSON.stringify(profile));
+  // Befehl an Supabase: Füge diese Zeile in die Tabelle 'fahrzeuge' ein
+  const { error } = await db.from('fahrzeuge').insert([neuerWagen]);
 
-  // Eingabefeld für den Namen wieder leeren und Dropdown updaten
+  if (error) {
+    alert("Fehler beim Speichern: " + error.message);
+    return;
+  }
+
   document.getElementById("w_name").value = "";
-  dropdownAktualisieren();
-  
-  // Setze das Dropdown direkt auf den neu erstellten Wagen
-  document.getElementById("wagenSelect").value = wagen.id;
-  alert('Wagen "' + name + '" wurde erfolgreich gespeichert!');
+  await dropdownAktualisieren(); // Dropdown aktualisieren
+  alert('Wagen "' + name + '" wurde erfolgreich in der Cloud gespeichert!');
 }
 
-// 5. Dropdown mit allen gespeicherten Wagen füllen
-// Dropdown mit Presets und eigenen Wägen füllen
-function dropdownAktualisieren() {
+// 5. CLOUD-LADEN: Dropdown füllen
+async function dropdownAktualisieren() {
   const select = document.getElementById("wagenSelect");
-  const profile = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
   
-  // Leere das Dropdown
+  // Befehl an Supabase: Lese (*) alle Zeilen aus der Tabelle 'fahrzeuge'
+  const { data, error } = await db.from('fahrzeuge').select('*');
+  
+  if (error) {
+    console.error("Fehler beim Laden aus Supabase:", error);
+    return;
+  }
+  
+  // Wir speichern die geladenen Daten in unserer Variable
+  cloudProfile = data || [];
+
   select.innerHTML = '<option value="">-- Manuelle Eingabe --</option>';
   
-  // 1. Kategorie: Die globalen Presets hinzufügen
   if (PRESETS.length > 0) {
     const groupPresets = document.createElement("optgroup");
-    groupPresets.label = "Standard-Modelle";
+    groupPresets.label = "🌟 Standard-Modelle";
     PRESETS.forEach(wagen => {
       const option = document.createElement("option");
       option.value = wagen.id;
@@ -166,11 +174,10 @@ function dropdownAktualisieren() {
     select.appendChild(groupPresets);
   }
   
-  // 2. Kategorie: Die lokal gespeicherten Wägen des Nutzers
-  if (profile.length > 0) {
+  if (cloudProfile.length > 0) {
     const groupEigene = document.createElement("optgroup");
-    groupEigene.label = "Meine gespeicherten Wägen";
-    profile.forEach(wagen => {
+    groupEigene.label = "☁️ Cloud-Wägen";
+    cloudProfile.forEach(wagen => {
       const option = document.createElement("option");
       option.value = wagen.id;
       option.text = wagen.name;
@@ -180,28 +187,28 @@ function dropdownAktualisieren() {
   }
 }
 
-// NEU: Ausgewähltes Profil löschen
-function profilLoeschen() {
+// 6. CLOUD-LÖSCHEN
+async function profilLoeschen() {
   const select = document.getElementById("wagenSelect");
   const gewaehlteId = select.value;
 
   if (!gewaehlteId) return;
 
-  // Sicherheitsabfrage im Browser
-  const bestaetigt = confirm("Möchtest du diesen Wagen wirklich unwiderruflich löschen?");
-  if (!bestaetigt) return; // Wenn Nutzer auf Abbrechen klickt, stoppen
+  const bestaetigt = confirm("Möchtest du diesen Wagen aus der Cloud löschen? Er verschwindet dann für alle Nutzer.");
+  if (!bestaetigt) return; 
 
-  // 1. Hole alle gespeicherten Profile
-  let profile = JSON.parse(localStorage.getItem(DB_KEY) || "[]");
-  
-  // 2. Filtere den Wagen heraus (Behalte alle, deren ID NICHT die gewählte ist)
-  profile = profile.filter(wagen => wagen.id != gewaehlteId);
-  
-  // 3. Speichere die bereinigte Liste zurück
-  localStorage.setItem(DB_KEY, JSON.stringify(profile));
+  // Befehl an Supabase: Lösche die Zeile, wo die ID gleich der gewählten ID ist
+  const { error } = await db
+    .from('fahrzeuge')
+    .delete()
+    .eq('id', gewaehlteId);
 
-  // 4. Aufräumen: Dropdown updaten, Auswahl zurücksetzen, Button verstecken
-  dropdownAktualisieren();
+  if (error) {
+    alert("Fehler beim Löschen: " + error.message);
+    return;
+  }
+
+  await dropdownAktualisieren();
   select.value = ""; 
   document.getElementById("btn_loeschen").style.display = "none";
 }
