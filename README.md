@@ -2,7 +2,7 @@
 
 > Eine leichte, responsive Web-App zur schnellen Berechnung von Volumen und Gewicht von Maischewägen anhand der Füllhöhe.
 
-[![Live Demo](https://img.shields.io/badge/Demo-Live%20Web%20App-brightgreen?style=for-the-badge)](https://[dein-github-name].github.io/[dein-repo-name]/)
+[![Live Demo](https://img.shields.io/badge/Demo-Live%20Web%20App-brightgreen?style=for-the-badge)][(https://johannklein.github.io/maischewagen/]
 
 ---
 
